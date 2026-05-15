@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Screener Pro</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Screener Pro">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%0A%20%20%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2218%22%20fill%3D%22%230a0e1a%22/%3E%0A%20%20%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2218%22%20fill%3D%22none%22%20stroke%3D%22%2300d4aa%22%20stroke-width%3D%223%22/%3E%0A%20%20%3Cpolyline%20points%3D%2212%2C72%2030%2C55%2045%2C62%2060%2C38%2075%2C28%2088%2C35%22%20%0A%20%20%20%20fill%3D%22none%22%20stroke%3D%22%2300d4aa%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%0A%20%20%3Ccircle%20cx%3D%2288%22%20cy%3D%2235%22%20r%3D%225%22%20fill%3D%22%2300d4aa%22/%3E%0A%3C/svg%3E">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+  :root {
+    --bg:#0a0e1a;--surface:#111827;--surface2:#1a2234;--border:#1e2d45;
+    --accent:#00d4aa;--accent2:#3b82f6;--warn:#f59e0b;--danger:#ef4444;
+    --success:#22c55e;--purple:#8b5cf6;--text:#e2e8f0;--text2:#94a3b8;
+    --text3:#475569;--mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden}
+  .header{position:sticky;top:0;z-index:100;background:rgba(10,14,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 20px 10px}
+  .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .logo{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
+  .sync-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s}
+  .sync-btn.loading{color:var(--accent);border-color:var(--accent)}
+  .spin{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .nav{display:flex;gap:4px;background:var(--surface);border-radius:12px;padding:4px}
+  .nav-tab{flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:500;color:var(--text3);cursor:pointer;transition:all 0.2s;border:none;background:none;font-family:var(--sans)}
+  .nav-tab.active{background:var(--surface2);color:var(--accent);border:1px solid var(--border)}
+  .tab-icon{display:block;font-size:16px;margin-bottom:2px}
+  .content{padding:16px;padding-bottom:24px}
+  .section-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+  .status-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+  .status-item .val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent)}
+  .status-item .lbl{font-size:10px;color:var(--text3);margin-top:2px}
+  .pnl-banner{background:linear-gradient(135deg,var(--surface2),var(--surface));border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .pnl-banner .lbl{font-size:10px;color:var(--text3);margin-bottom:4px}
+  .pnl-banner .val{font-family:var(--mono);font-size:20px;font-weight:700}
+  .val.pos{color:var(--success)}.val.neg{color:var(--danger)}
+  .pos-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden}
+  .pos-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
+  .pos-card.alerta::before{background:var(--warn)}
+  .pos-card.peligro::before{background:var(--danger)}
+  .pos-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+  .pos-ticker{font-family:var(--mono);font-size:16px;font-weight:700}
+  .pos-dias{font-size:10px;color:var(--text3);margin-top:2px}
+  .pnl-pct{font-family:var(--mono);font-size:16px;font-weight:700}
+  .pnl-abs{font-size:10px;color:var(--text3)}
+  .pos-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+  .tag{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+  .tag-af{background:#14532d;color:#86efac}.tag-a{background:#166534;color:#bbf7d0}
+  .tag-n{background:#1e293b;color:#94a3b8}.tag-b{background:#431407;color:#fdba74}
+  .tag-tf{background:#14532d;color:#86efac}.tag-pb{background:#166534;color:#bbf7d0}
+  .tag-sp{background:#1a3a2a;color:#6ee7b7}.tag-lt{background:#422006;color:#fcd34d}
+  .tag-rs{background:#431407;color:#fca5a5}.tag-se{background:#450a0a;color:#fca5a5}
+  .tag-ag{background:#3b0764;color:#d8b4fe}.tag-c{background:#14532d;color:#86efac}
+  .tag-cp{background:#166534;color:#bbf7d0}.tag-m{background:#1e3a5f;color:#93c5fd}
+  .tag-e{background:#1e293b;color:#94a3b8}.tag-na{background:#431407;color:#fdba74}
+  .tag-rp{background:#450a0a;color:#fca5a5}.tag-sal{background:#3b0764;color:#d8b4fe}
+  .var-chips{display:flex;gap:6px;margin-bottom:10px}
+  .var-chip{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:6px;font-weight:700}
+  .vc-pos{background:rgba(34,197,94,0.15);color:var(--success)}
+  .vc-neg{background:rgba(239,68,68,0.15);color:var(--danger)}
+  .vc-neu{background:var(--surface2);color:var(--text3)}
+  .chip-lbl{font-weight:400;color:var(--text3);margin-right:3px}
+  .pos-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface2);border-radius:8px;padding:8px}
+  .p-lbl{font-size:9px;color:var(--text3)}.p-val{font-family:var(--mono);font-size:11px;margin-top:2px}
+  .p-stop .p-val{color:var(--danger)}.p-tp .p-val{color:var(--success)}
+  .stop-alerta{margin-top:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:7px 10px;font-size:10px;color:var(--warn);display:flex;align-items:center;gap:6px}
+  .rank-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+  .rank-num{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:20px}
+  .rank-ticker{font-family:var(--mono);font-size:14px;font-weight:700}
+  .rank-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+  .score-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent)}
+  .score-lbl{font-size:9px;color:var(--text3)}
+  .sec-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;margin-bottom:10px;font-family:var(--mono);font-size:11px;letter-spacing:1px}
+  .sec-clasico{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--accent2)}
+  .sec-momentum{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:var(--success)}
+  .ticker-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:20px;text-transform:uppercase;padding:14px 16px;border-radius:12px;outline:none;letter-spacing:3px;transition:border-color 0.2s;margin-bottom:12px}
+  .ticker-input:focus{border-color:var(--accent)}
+  .ticker-input::placeholder{color:var(--text3);font-size:14px;letter-spacing:1px}
+  .analyze-btn{width:100%;background:var(--accent);color:#0a0e1a;border:none;border-radius:12px;padding:14px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.2s;margin-bottom:16px}
+  .analyze-btn:active{transform:scale(0.98);opacity:0.9}
+  .analyze-btn:disabled{background:var(--surface2);color:var(--text3)}
+  .result-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeIn 0.3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .result-header{background:var(--surface2);padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .result-ticker{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent)}
+  .result-precio{font-family:var(--mono);font-size:14px;color:var(--text2)}
+  .result-capas{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .capa-item{background:var(--surface2);border-radius:8px;padding:10px}
+  .capa-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+  .capa-val{font-size:12px;font-weight:600}
+  .result-accion{margin:0 14px 14px;padding:12px;border-radius:10px;text-align:center;font-family:var(--mono);font-size:14px;font-weight:700}
+  .ac-c{background:rgba(34,197,94,0.15);color:var(--success);border:1px solid rgba(34,197,94,0.3)}
+  .ac-m{background:rgba(59,130,246,0.15);color:var(--accent2);border:1px solid rgba(59,130,246,0.3)}
+  .ac-e{background:rgba(71,85,105,0.3);color:var(--text2);border:1px solid var(--border)}
+  .ac-na{background:rgba(245,158,11,0.1);color:var(--warn);border:1px solid rgba(245,158,11,0.3)}
+  .ac-r{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.3)}
+  .ac-s{background:rgba(139,92,246,0.15);color:var(--purple);border:1px solid rgba(139,92,246,0.3)}
+  .empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+  .empty-icon{font-size:40px;margin-bottom:12px;opacity:0.5}
+  .empty-text{font-size:13px;line-height:1.6}
+  .error-msg{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--danger);text-align:center;margin-bottom:12px}
+  .loading-state{text-align:center;padding:40px;color:var(--text3);font-size:13px}
+  .dot{display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;margin:0 3px;animation:bounce 1.2s infinite}
+  .dot:nth-child(2){animation-delay:0.2s}.dot:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+  .last-update{text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);padding:8px}
+  .tab-content{display:none}.tab-content.active{display:block}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div class="logo">▸ Screener Pro</div>
+    <button class="sync-btn" id="syncBtn" onclick="sincronizar()">
+      <span id="syncIcon">↻</span>
+      <span id="syncText">Actualizar</span>
+    </button>
+  </div>
+  <div class="nav">
+    <button class="nav-tab active" onclick="switchTab('portafolio',this)">
+      <span class="tab-icon">💼</span>Portafolio
+    </button>
+    <button class="nav-tab" onclick="switchTab('ranking',this)">
+      <span class="tab-icon">🏆</span>Ranking
+    </button>
+    <button class="nav-tab" onclick="switchTab('analizar',this)">
+      <span class="tab-icon">🔍</span>Analizar
+    </button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="tab-content active" id="tab-portafolio">
+    <div id="port-loading" class="loading-state"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div style="margin-top:12px">Cargando portafolio...</div></div>
+    <div id="port-error" class="error-msg" style="display:none"></div>
+    <div id="port-content" style="display:none"></div>
+  </div>
+  <div class="tab-content" id="tab-ranking">
+    <div id="rank-loading" class="loading-state" style="display:none"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div style="margin-top:12px">Cargando ranking...</div></div>
+    <div id="rank-error" class="error-msg" style="display:none"></div>
+    <div id="rank-content"><div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">Tocá <strong>Actualizar</strong> para cargar el ranking</div></div></div>
+  </div>
+  <div class="tab-content" id="tab-analizar">
+    <div class="section-title">Análisis rápido</div>
+    <input class="ticker-input" id="tickerInput" type="text" placeholder="Ej: AAPL, NVDA..."
+      maxlength="10" oninput="this.value=this.value.toUpperCase()"
+      onkeydown="if(event.key==='Enter')analizarTicker()">
+    <button class="analyze-btn" id="analyzeBtn" onclick="analizarTicker()">ANALIZAR →</button>
+    <div id="analizar-result"></div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbz4Yk9uZ7B-pdutGIQ0BoGkJeVpwoy1ri2zY2HLdSQMJwviETLCbMehwLG8yMhUga8ZUw/exec';
+let cache = {}, lastUpdate = null;
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+  if (!cache[name] && name !== 'analizar') cargarTab(name);
+}
+
+async function sincronizar() {
+  cache = {};
+  const tab = document.querySelector('.tab-content.active').id.replace('tab-','');
+  if (tab !== 'analizar') await cargarTab(tab);
+}
+
+async function fetchHoja(nombre) {
+  const r = await fetch(API + '?hoja=' + encodeURIComponent(nombre), {
+    redirect: 'follow',
+    mode: 'cors'
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if (j.error) throw new Error(j.error);
+  return j.data || [];
+}
+
+async function cargarTab(tab) {
+  const btn = document.getElementById('syncBtn');
+  const icon = document.getElementById('syncIcon');
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+  document.getElementById('syncText').textContent = 'Cargando...';
+  try {
+    if (tab === 'portafolio') await cargarPortafolio();
+    else if (tab === 'ranking') await cargarRanking();
+    lastUpdate = new Date();
+  } catch(e) { mostrarError(tab, e.message); }
+  finally {
+    btn.classList.remove('loading');
+    icon.classList.remove('spin');
+    document.getElementById('syncText').textContent = 'Actualizar';
+  }
+}
+
+async function cargarPortafolio() {
+  show('port-loading'); hide('port-content'); hide('port-error');
+  const data = await fetchHoja('Mi Portafolio');
+  cache.portafolio = data;
+  hide('port-loading'); show('port-content');
+  renderPortafolio(data);
+}
+
+function renderPortafolio(data) {
+  if (!data || data.length < 7) {
+    document.getElementById('port-content').innerHTML = empty('💼','No hay posiciones cargadas.');
+    return;
+  }
+  const res = data[2] || [];
+  const abiertas = res[0]||0, cerradas = res[1]||0; const wrRaw = res[2]; const wr = (typeof wrRaw === 'number' && wrRaw > 0 && wrRaw <= 1) ? Math.round(wrRaw*100)+'%' : (wrRaw||'—');
+  const pnlUSD = parseFloat(res[23])||0;
+  const pnlARS = parseFloat(res[25])||0;
+  const posiciones = data.slice(6).filter(r => r[0] && r[0].toString().trim());
+
+  let h = `<div class="status-bar">
+    <div class="status-item"><div class="val">${abiertas}</div><div class="lbl">Abiertas</div></div>
+    <div class="status-item"><div class="val">${cerradas}</div><div class="lbl">Cerradas</div></div>
+    <div class="status-item"><div class="val">${wr}</div><div class="lbl">Win rate</div></div>
+  </div>
+  <div class="pnl-banner">
+    <div><div class="lbl">PnL Total USD</div><div class="val ${pnlUSD>=0?'pos':'neg'}">$${fmt(pnlUSD,2)}</div></div>
+    <div style="text-align:right"><div class="lbl">PnL Total ARS</div><div class="val ${pnlARS>=0?'pos':'neg'}">$${fmt(pnlARS,0)}</div></div>
+  </div>
+  <div class="section-title">Posiciones</div>`;
+
+  posiciones.forEach(r => {
+    const ticker = r[0]||'', estado = (r[1]||'').trim();
+    const cerrada = estado === 'Cerrada';
+    const dias=r[13]||'', varUSD=r[14]||'', varARS=r[15]||'';
+    const stopARS=r[17]||'—', limARS=r[18]||'—', tpARS=r[20]||'—';
+    const stopCarg=parseFloat(r[8])||0;
+    const pnlPctARS=r[23]||'', pnlAbsARS=r[25]||'';
+    const bias=r[26]||'—', estadoT=r[27]||'—', accion=r[29]||'—';
+    const pnlN = parseFloat((pnlPctARS||'').toString().replace('%',''))||0;
+    const stopSugN = parseFloat((stopARS||'').toString().replace(/[^0-9.]/g,''))||0;
+    const stopDesc = !cerrada && stopSugN>0 && (stopCarg===0||stopSugN>stopCarg);
+    let cls = '';
+    if (estadoT.includes('Agotamiento')||estadoT.includes('Pump')) cls='peligro';
+    else if (stopDesc||estadoT.includes('Resistencia')||estadoT.includes('Sobreextensión')) cls='alerta';
+
+    h += `<div class="pos-card ${cls}">
+      <div class="pos-header">
+        <div><div class="pos-ticker">${ticker}</div><div class="pos-dias">${dias?dias+' días·':''} ${estado}</div></div>
+        <div style="text-align:right"><div class="pnl-pct ${pnlN>=0?'pos':'neg'}">${pnlPctARS||'—'}</div><div class="pnl-abs">ARS ${fmtP(pnlAbsARS)}</div></div>
+      </div>`;
+    if (!cerrada) {
+      h += `<div class="var-chips">${vc(varUSD,'USD')}${vc(varARS,'ARS')}</div>
+      <div class="pos-tags">${bTag(bias)}${eTag(estadoT)}${aTag(accion)}</div>
+      <div class="pos-prices">
+        <div class="p-stop"><div class="p-lbl">Stop ARS</div><div class="p-val">${fmtP(stopARS)}</div></div>
+        <div class="p-stop"><div class="p-lbl">Límite ARS</div><div class="p-val">${fmtP(limARS)}</div></div>
+        <div class="p-tp"><div class="p-lbl">Take Profit</div><div class="p-val">${fmtP(tpARS)}</div></div>
+      </div>`;
+      if (stopDesc) h += `<div class="stop-alerta">⚠️ Actualizar stop en Bull Market → $${fmtP(stopARS)}</div>`;
+    }
+    h += '</div>';
+  });
+
+  if (lastUpdate) h += `<div class="last-update">Actualizado ${lastUpdate.toLocaleTimeString('es-AR')}</div>`;
+  document.getElementById('port-content').innerHTML = h;
+}
+
+async function cargarRanking() {
+  show('rank-loading');
+  document.getElementById('rank-content').innerHTML = '';
+  hide('rank-error');
+  const data = await fetchHoja('Ranking Top 10');
+  cache.ranking = data;
+  hide('rank-loading');
+  renderRanking(data);
+}
+
+function renderRanking(data) {
+  if (!data||data.length<3) {
+    document.getElementById('rank-content').innerHTML = empty('🏆','Corré el Ranking Top 10 desde la planilla primero.');
+    return;
+  }
+  let h='', sec='', nC=0, nM=0;
+  data.forEach(r => {
+    const c0=(r[0]||'').toString();
+    if (c0.includes('CLÁSICO')||c0.includes('CLASICO')) { sec='c'; nC=0; h+=`<div class="sec-header sec-clasico">📊 TOP 10 CLÁSICO</div>`; return; }
+    if (c0.includes('MOMENTUM')) { sec='m'; nM=0; h+=`<div class="sec-header sec-momentum">🚀 TOP 10 MOMENTUM</div>`; return; }
+    if (!c0||c0==='Ticker') return;
+    if (sec==='c') { nC++; h+=rankCard(r,nC); }
+    else if (sec==='m') { nM++; h+=rankCard(r,nM); }
+  });
+  if (!h) h = empty('🏆','Corré el Ranking Top 10 desde la planilla primero.');
+  if (lastUpdate) h+=`<div class="last-update">Datos al ${lastUpdate.toLocaleTimeString('es-AR')}</div>`;
+  document.getElementById('rank-content').innerHTML = h;
+}
+
+function rankCard(r,n) {
+  return `<div class="rank-card">
+    <div class="rank-num">#${n}</div>
+    <div style="flex:1">
+      <div class="rank-ticker">${r[0]||''}</div>
+      <div class="rank-tags">${sTag((r[2]||'').trim())}<span class="tag tag-n">$${fmtP(r[3])}</span></div>
+    </div>
+    <div style="text-align:right"><div class="score-val">${parseFloat(r[1]||0).toFixed(1)}</div><div class="score-lbl">score</div></div>
+  </div>`;
+}
+
+async function analizarTicker() {
+  const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
+  if (!ticker) return;
+  const btn = document.getElementById('analyzeBtn');
+  const res = document.getElementById('analizar-result');
+  btn.disabled=true; btn.textContent='Buscando...';
+  res.innerHTML=`<div class="loading-state"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
+  try {
+    const data = await fetchHoja('Evaluación Manual');
+    const fila = data.slice(1).find(r=>(r[0]||'').toString().trim().toUpperCase()===ticker);
+    if (!fila) {
+      res.innerHTML=`<div class="error-msg">No encontré "${ticker}" en Evaluación Manual.<br>Agregalo a la hoja y corré el análisis.</div>`;
+    } else {
+      const bias=fila[1]||'—', estado=fila[2]||'—', op=fila[3]||'—', acc=fila[4]||'—';
+      const cal=fila[5]||'—', score=fila[6]||'—', rr=fila[7]||'—';
+      const precARS=fila[8]||'—', vUSD=fila[9]||'—', vARS=fila[10]||'—';
+      res.innerHTML=`<div class="result-panel">
+        <div class="result-header">
+          <div class="result-ticker">${ticker}</div>
+          <div class="result-precio">$${fmtP(precARS)} ARS</div>
+        </div>
+        <div class="result-capas">
+          <div class="capa-item"><div class="capa-lbl">Bias</div><div class="capa-val">${bias}</div></div>
+          <div class="capa-item"><div class="capa-lbl">Estado</div><div class="capa-val">${estado}</div></div>
+          <div class="capa-item"><div class="capa-lbl">Oportunidad</div><div class="capa-val">${op}</div></div>
+          <div class="capa-item"><div class="capa-lbl">Calidad</div><div class="capa-val">${cal}</div></div>
+          <div class="capa-item"><div class="capa-lbl">Score</div><div class="capa-val" style="color:var(--accent);font-family:var(--mono)">${score}</div></div>
+          <div class="capa-item"><div class="capa-lbl">R:R</div><div class="capa-val" style="font-family:var(--mono)">${rr}</div></div>
+          <div class="capa-item"><div class="capa-lbl">Var USD</div><div class="capa-val">${vi(vUSD)}</div></div>
+          <div class="capa-item"><div class="capa-lbl">Var ARS</div><div class="capa-val">${vi(vARS)}</div></div>
+        </div>
+        <div class="result-accion ${ac(acc)}">${acc}</div>
+      </div>`;
+    }
+  } catch(e) { res.innerHTML=`<div class="error-msg">Error: ${e.message}</div>`; }
+  finally { btn.disabled=false; btn.textContent='ANALIZAR →'; }
+}
+
+// Helpers
+function fmt(n,d){return parseFloat(n).toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function fmtP(v){const n=parseFloat((v||'').toString().replace(',',''));if(isNaN(n))return v||'—';return n>1000?n.toLocaleString('es-AR',{maximumFractionDigits:0}):n.toLocaleString('es-AR',{maximumFractionDigits:2});}
+function vc(val,lbl){const r=parseFloat((val||'').toString().replace('%',''));if(isNaN(r))return`<span class="var-chip vc-neu"><span class="chip-lbl">${lbl}</span>—</span>`;const c=r>0?'vc-pos':r<0?'vc-neg':'vc-neu';return`<span class="var-chip ${c}"><span class="chip-lbl">${lbl}</span>${r>0?'+':''}${r.toFixed(2)}%</span>`;}
+function vi(v){const r=parseFloat((v||'').toString().replace('%',''));if(isNaN(r))return'—';const c=r>0?'var(--success)':r<0?'var(--danger)':'var(--text3)';return`<span style="color:${c};font-family:var(--mono)">${r>0?'+':''}${r.toFixed(2)}%</span>`;}
+function bTag(v){if(!v||v==='—')return'';if(v.includes('Alcista fuerte'))return`<span class="tag tag-af">${v}</span>`;if(v.includes('Alcista'))return`<span class="tag tag-a">${v}</span>`;if(v.includes('Bajista'))return`<span class="tag tag-b">${v}</span>`;return`<span class="tag tag-n">${v}</span>`;}
+function eTag(v){if(!v||v==='—')return'';const m={'Tendencia fuerte':'tf','Pullback':'pb','Soporte':'sp','Lateral':'lt','Resistencia':'rs','Sobreextensión':'se','Agotamiento':'ag'};for(let k in m)if(v.includes(k))return`<span class="tag tag-${m[k]}">${v}</span>`;return`<span class="tag tag-n">${v}</span>`;}
+function aTag(v){const m={'Comprar':'c','Comprar parcial':'cp','Mantener':'m','Esperar':'e','No agregar':'na','Reducir parcial':'rp','Salir':'sal'};return`<span class="tag tag-${m[v]||'e'}">${v||'—'}</span>`;}
+function sTag(v){const m={'COMPRA FUERTE':'c','COMPRA':'cp','MANTENER FUERTE':'m','MANTENER':'m','ESPERAR':'e','REDUCIR':'rp','EVITAR':'sal'};return`<span class="tag tag-${m[v.toUpperCase()]||'e'}">${v}</span>`;}
+function ac(v){const m={'Comprar':'ac-c','Comprar parcial':'ac-c','Mantener':'ac-m','Esperar':'ac-e','No agregar':'ac-na','Reducir parcial':'ac-r','Salir':'ac-s'};return m[v]||'ac-e';}
+function show(id){document.getElementById(id).style.display='block';}
+function hide(id){document.getElementById(id).style.display='none';}
+function empty(icon,txt){return`<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-text">${txt}</div></div>`;}
+function mostrarError(tab,msg){const p={'portafolio':'port','ranking':'rank'}[tab]||tab;show(p+'-error');document.getElementById(p+'-error').textContent='Error: '+msg;hide(p+'-loading');}
+
+window.onload = () => cargarPortafolio();
+</script>
+</body>
+</html>
