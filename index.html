@@ -300,13 +300,27 @@ function renderRanking(data) {
 }
 
 function rankCard(r,n) {
+  // Cols: Ticker=0, Señal=1, Bias=2, Estado=3, Precio/Var3d=4, Stop=5/7, TP=6/8, RR=7/6, ATR/ADX=8/5, RVOL=9, Op=10/9, Acc=11/10
+  const ticker = r[0]||'';
+  const senal  = (r[1]||'').trim();
+  const bias   = r[2]||'—';
+  const estado = r[3]||'—';
+  const op     = r[10]||r[9]||'—';
+  const acc    = r[11]||r[10]||'—';
   return `<div class="rank-card">
     <div class="rank-num">#${n}</div>
     <div style="flex:1">
-      <div class="rank-ticker">${r[0]||''}</div>
-      <div class="rank-tags">${sTag((r[2]||'').trim())}<span class="tag tag-n">$${fmtP(r[3])}</span></div>
+      <div class="rank-ticker">${ticker}</div>
+      <div class="rank-tags" style="margin-top:5px">
+        ${sTag(senal)}
+      </div>
+      <div class="rank-tags" style="margin-top:4px">
+        ${bTag(bias)}${eTag(estado)}
+      </div>
+      <div class="rank-tags" style="margin-top:4px">
+        ${aTag(acc)}
+      </div>
     </div>
-    <div style="text-align:right"><div class="score-val">${parseFloat(r[1]||0).toFixed(1)}</div><div class="score-lbl">score</div></div>
   </div>`;
 }
 
