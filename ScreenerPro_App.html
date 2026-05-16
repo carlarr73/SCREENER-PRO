@@ -220,12 +220,12 @@ function renderPortafolio(data) {
   const abiertas = res[0]||0, cerradas = res[1]||0; const wrRaw = res[2]; const wr = (typeof wrRaw === 'number' && wrRaw > 0 && wrRaw <= 1) ? Math.round(wrRaw*100)+'%' : (wrRaw||'—');
   const pnlUSD = parseFloat(res[23])||0;
   const pnlARS = parseFloat(res[25])||0;
-  const posiciones = data.slice(6).filter(r => r[0] && r[0].toString().trim());
+  const posiciones = data.slice(6).filter(r => r[0] && r[0].toString().trim() && (r[1]||'').toString().trim() !== 'Cerrada');
 
   let h = `<div class="status-bar">
     <div class="status-item"><div class="val">${abiertas}</div><div class="lbl">Abiertas</div></div>
-    <div class="status-item"><div class="val">${cerradas}</div><div class="lbl">Cerradas</div></div>
     <div class="status-item"><div class="val">${wr}</div><div class="lbl">Win rate</div></div>
+    <div class="status-item"><div class="val">${cerradas}</div><div class="lbl">Cerradas</div></div>
   </div>
   <div class="pnl-banner">
     <div><div class="lbl">PnL Total USD</div><div class="val ${pnlUSD>=0?'pos':'neg'}">$${fmt(pnlUSD,2)}</div></div>
@@ -373,7 +373,16 @@ async function analizarTicker() {
 // Helpers
 function fmt(n,d){return parseFloat(n).toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function fmtP(v){const n=parseFloat((v||'').toString().replace(',',''));if(isNaN(n))return v||'—';return n>1000?n.toLocaleString('es-AR',{maximumFractionDigits:0}):n.toLocaleString('es-AR',{maximumFractionDigits:2});}
-function vc(val,lbl){const r=parseFloat((val||'').toString().replace('%',''));if(isNaN(r))return`<span class="var-chip vc-neu"><span class="chip-lbl">${lbl}</span>—</span>`;const c=r>0?'vc-pos':r<0?'vc-neg':'vc-neu';return`<span class="var-chip ${c}"><span class="chip-lbl">${lbl}</span>${r>0?'+':''}${r.toFixed(2)}%</span>`;}
+function vc(val,lbl){
+  let raw=(val||'').toString().trim();
+  if(raw==='—'||raw==='N/D'||raw==='')return`<span class="var-chip vc-neu"><span class="chip-lbl">${lbl}</span>—</span>`;
+  let r=parseFloat(raw.replace('%',''));
+  if(isNaN(r))return`<span class="var-chip vc-neu"><span class="chip-lbl">${lbl}</span>${raw}</span>`;
+  // Si ya viene como % (ej: "7.47%") el valor es grande; si viene decimal (0.0747) convertir
+  if(!raw.includes('%') && Math.abs(r)<1.5) r=r*100;
+  const c=r>0?'vc-pos':r<0?'vc-neg':'vc-neu';
+  return`<span class="var-chip ${c}"><span class="chip-lbl">${lbl}</span>${r>0?'+':''}${r.toFixed(2)}%</span>`;
+}
 function vi(v){const r=parseFloat((v||'').toString().replace('%',''));if(isNaN(r))return'—';const c=r>0?'var(--success)':r<0?'var(--danger)':'var(--text3)';return`<span style="color:${c};font-family:var(--mono)">${r>0?'+':''}${r.toFixed(2)}%</span>`;}
 function bTag(v){if(!v||v==='—')return'';if(v.includes('Alcista fuerte'))return`<span class="tag tag-af">${v}</span>`;if(v.includes('Alcista'))return`<span class="tag tag-a">${v}</span>`;if(v.includes('Bajista'))return`<span class="tag tag-b">${v}</span>`;return`<span class="tag tag-n">${v}</span>`;}
 function eTag(v){if(!v||v==='—')return'';const m={'Tendencia fuerte':'tf','Pullback':'pb','Soporte':'sp','Lateral':'lt','Resistencia':'rs','Sobreextensión':'se','Agotamiento':'ag'};for(let k in m)if(v.includes(k))return`<span class="tag tag-${m[k]}">${v}</span>`;return`<span class="tag tag-n">${v}</span>`;}
