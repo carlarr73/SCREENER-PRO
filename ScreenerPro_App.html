@@ -239,9 +239,14 @@ function renderPortafolio(data) {
     const dias=r[13]||'', varUSD=r[14]||'', varARS=r[15]||'';
     const stopARS=r[17]||'—', limARS=r[18]||'—', tpARS=r[20]||'—';
     const stopCarg=parseFloat(r[8])||0;
-    const pnlPctARS=r[23]||'', pnlAbsARS=r[25]||'';
+    const pnlPctARSraw=r[23]||'', pnlAbsARS=r[25]||'';
+    // Convertir decimal a % (0.1872 → 18.72%)
+    const pnlPctARSnum = parseFloat((pnlPctARSraw||'').toString().replace('%',''))||0;
+    const pnlPctARS = Math.abs(pnlPctARSnum) <= 1.5 && !pnlPctARSraw.toString().includes('%')
+      ? (pnlPctARSnum * 100).toFixed(2) + '%'
+      : pnlPctARSnum.toFixed(2) + '%';
     const bias=r[26]||'—', estadoT=r[27]||'—', accion=r[29]||'—';
-    const pnlN = parseFloat((pnlPctARS||'').toString().replace('%',''))||0;
+    const pnlN = parseFloat(pnlPctARS.replace('%',''))||0;
     const stopSugN = parseFloat((stopARS||'').toString().replace(/[^0-9.]/g,''))||0;
     const stopDesc = !cerrada && stopSugN>0 && (stopCarg===0||stopSugN>stopCarg);
     let cls = '';
@@ -251,7 +256,10 @@ function renderPortafolio(data) {
     h += `<div class="pos-card ${cls}">
       <div class="pos-header">
         <div><div class="pos-ticker">${ticker}</div><div class="pos-dias">${dias?dias+' días·':''} ${estado}</div></div>
-        <div style="text-align:right"><div class="pnl-pct ${pnlN>=0?'pos':'neg'}">${pnlPctARS||'—'}</div><div class="pnl-abs">ARS ${fmtP(pnlAbsARS)}</div></div>
+        <div style="text-align:right">
+          <div class="pnl-pct" style="color:${pnlN>0?'var(--success)':pnlN<0?'var(--danger)':'var(--text)'}">${pnlPctARS||'—'}</div>
+          <div class="pnl-abs" style="color:${parseFloat((pnlAbsARS||'0').toString().replace(',',''))>0?'var(--success)':parseFloat((pnlAbsARS||'0').toString().replace(',',''))<0?'var(--danger)':'var(--text3)'}">$${fmtP(pnlAbsARS)} ARS</div>
+        </div>
       </div>`;
     if (!cerrada) {
       h += `<div class="var-chips">${vc(varUSD,'USD')}${vc(varARS,'ARS')}</div>
@@ -300,13 +308,27 @@ function renderRanking(data) {
 }
 
 function rankCard(r,n) {
+  // Cols: Ticker=0, Señal=1, Bias=2, Estado=3, Precio/Var3d=4, Stop=5/7, TP=6/8, RR=7/6, ATR/ADX=8/5, RVOL=9, Op=10/9, Acc=11/10
+  const ticker = r[0]||'';
+  const senal  = (r[1]||'').trim();
+  const bias   = r[2]||'—';
+  const estado = r[3]||'—';
+  const op     = r[10]||r[9]||'—';
+  const acc    = r[11]||r[10]||'—';
   return `<div class="rank-card">
     <div class="rank-num">#${n}</div>
     <div style="flex:1">
-      <div class="rank-ticker">${r[0]||''}</div>
-      <div class="rank-tags">${sTag((r[2]||'').trim())}<span class="tag tag-n">$${fmtP(r[3])}</span></div>
+      <div class="rank-ticker">${ticker}</div>
+      <div class="rank-tags" style="margin-top:5px">
+        ${sTag(senal)}
+      </div>
+      <div class="rank-tags" style="margin-top:4px">
+        ${bTag(bias)}${eTag(estado)}
+      </div>
+      <div class="rank-tags" style="margin-top:4px">
+        ${aTag(acc)}
+      </div>
     </div>
-    <div style="text-align:right"><div class="score-val">${parseFloat(r[1]||0).toFixed(1)}</div><div class="score-lbl">score</div></div>
   </div>`;
 }
 
